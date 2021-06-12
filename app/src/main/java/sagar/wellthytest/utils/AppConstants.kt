@@ -10,8 +10,8 @@ object AppConstants {
 
     //language related constants
     const val SELECTED_LANGUAGE = "selected_language"
-    const val LANGUAGE_ENGLISH = "english"
-    const val LANGUAGE_HINDI = "hindi"
+    const val LANGUAGE_ENGLISH = "en"
+    const val LANGUAGE_HINDI = "hi"
 
     //theme related constants
     const val SELECTED_THEME = "selected_theme"
