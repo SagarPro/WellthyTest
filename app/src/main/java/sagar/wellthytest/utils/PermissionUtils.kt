@@ -55,11 +55,13 @@ object PermissionUtils {
 
     //function to get city by latlang
     fun Context.getCurrentCity(currentLatLng: LatLng): String?{
-        val geocoder = Geocoder(this, Locale.getDefault())
-        val addresses = geocoder.getFromLocation(currentLatLng.latitude, currentLatLng.longitude, 1)
-        if (addresses != null && addresses.size > 0) {
-            return addresses[0].locality
-        }
+        try {
+            val geocoder = Geocoder(this, Locale.getDefault())
+            val addresses = geocoder.getFromLocation(currentLatLng.latitude, currentLatLng.longitude, 1)
+            if (addresses != null && addresses.size > 0) {
+                return addresses[0].locality
+            }
+        } catch (e: Exception){}
         return null
     }
 

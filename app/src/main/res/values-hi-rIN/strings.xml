@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">WellthyTest</string>
+
+    <string name="enable_gps">जीपीएस सक्षम करें</string>
+    <string name="required_for_this_app">मौसम की रिपोर्ट प्राप्त करने के लिए इस ऐप को वर्तमान स्थान विवरण की आवश्यकता है</string>
+    <string name="enable">सक्षम</string>
+
+    <string name="language">भाषा</string>
+    <string name="language_english">English</string>
+    <string name="language_hindi">हिन्दी</string>
+
+    <string name="theme">विषय</string>
+    <string name="theme_light">रोशनी</string>
+    <string name="theme_dark">अंधेरा</string>
+</resources>

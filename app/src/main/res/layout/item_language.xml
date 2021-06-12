@@ -7,7 +7,7 @@
         android:id="@+id/header"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Language"
+        android:text="@string/language"
         android:textSize="18sp"
         android:fontFamily="sans-serif-condensed-medium"/>
 
@@ -20,7 +20,7 @@
             android:id="@+id/languageEnglish"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="English"
+            android:text="@string/language_english"
             android:textSize="16sp"
             android:fontFamily="sans-serif-condensed-light"
             android:layout_centerInParent="true"
@@ -39,7 +39,7 @@
             android:id="@+id/languageHindi"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Hindi"
+            android:text="@string/language_hindi"
             android:textSize="16sp"
             android:fontFamily="sans-serif-condensed-light"
             android:layout_centerInParent="true"

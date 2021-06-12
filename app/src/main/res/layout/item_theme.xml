@@ -7,7 +7,7 @@
         android:id="@+id/header"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Theme"
+        android:text="@string/theme"
         android:textSize="18sp"
         android:fontFamily="sans-serif-condensed-medium"/>
 
@@ -20,7 +20,7 @@
             android:id="@+id/themeLight"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Light"
+            android:text="@string/theme_light"
             android:textSize="16sp"
             android:fontFamily="sans-serif-condensed-light"
             android:layout_centerInParent="true"
@@ -39,7 +39,7 @@
             android:id="@+id/themeDark"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Dark"
+            android:text="@string/theme_dark"
             android:textSize="16sp"
             android:fontFamily="sans-serif-condensed-light"
             android:layout_centerInParent="true"

@@ -1,7 +1,15 @@
 <resources>
     <string name="app_name">WellthyTest</string>
 
-    <string name="enable_gps" translatable="false">Enable GPS</string>
-    <string name="required_for_this_app" translatable="false">This app requires current location details to get weather report.</string>
-    <string name="enable" translatable="false">Enable</string>
+    <string name="enable_gps">Enable GPS</string>
+    <string name="required_for_this_app">This app requires current location details to get weather report</string>
+    <string name="enable">Enable</string>
+
+    <string name="language">Language</string>
+    <string name="language_english">English</string>
+    <string name="language_hindi">हिन्दी</string>
+
+    <string name="theme">Theme</string>
+    <string name="theme_light">Light</string>
+    <string name="theme_dark">Dark</string>
 </resources>
