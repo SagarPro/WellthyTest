@@ -1,7 +1,9 @@
 package sagar.wellthytest
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.Configuration
@@ -18,6 +20,12 @@ import androidx.appcompat.widget.SwitchCompat
 import androidx.core.app.ActivityCompat
 import com.google.android.gms.location.*
 import com.google.android.gms.maps.model.LatLng
+import sagar.wellthytest.utils.AppConstants.LANGUAGE_ENGLISH
+import sagar.wellthytest.utils.AppConstants.LANGUAGE_HINDI
+import sagar.wellthytest.utils.AppConstants.SELECTED_LANGUAGE
+import sagar.wellthytest.utils.AppConstants.SELECTED_THEME
+import sagar.wellthytest.utils.AppConstants.THEME_DARK
+import sagar.wellthytest.utils.AppConstants.THEME_LIGHT
 import sagar.wellthytest.utils.LocaleHelper.setLocale
 import sagar.wellthytest.utils.PermissionUtils.LOCATION_PERMISSION_REQUEST_CODE
 import sagar.wellthytest.utils.PermissionUtils.getCurrentCity
@@ -25,12 +33,19 @@ import sagar.wellthytest.utils.PermissionUtils.isAccessFineLocationGranted
 import sagar.wellthytest.utils.PermissionUtils.isLocationEnabled
 import sagar.wellthytest.utils.PermissionUtils.requestAccessFineLocationPermission
 import sagar.wellthytest.utils.PermissionUtils.showGPSNotEnabledDialog
+import sagar.wellthytest.utils.SharedPreferencesHelper
 import java.util.*
-
+import javax.inject.Inject
 
 class WeatherReportActivity : AppCompatActivity() {
 
     private val TAG = "WeatherReportActivity"
+
+    //@Inject
+    //lateinit var pref: SharedPreferencesHelper
+
+    @SuppressLint("StaticFieldLeak")
+    private val pref = SharedPreferencesHelper(WellthyApp.context)
 
     private var currentLatLng: LatLng? = null
     private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
@@ -46,6 +61,14 @@ class WeatherReportActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        val locale = Locale("hi")
+        Locale.setDefault(locale)
+        val resources: Resources = resources
+        val config: Configuration = resources.configuration
+        config.setLocale(locale)
+        baseContext.createConfigurationContext(config)
+
         setContentView(R.layout.activity_weather_report)
 
         tvCityName = findViewById(R.id.tvCityName)
@@ -58,6 +81,10 @@ class WeatherReportActivity : AppCompatActivity() {
 
         setupLanguage()
         setupTheme()
+    }
+
+    override fun attachBaseContext(newBase: Context?) {
+        super.attachBaseContext(newBase)
     }
 
     override fun onStart() {
@@ -169,18 +196,28 @@ class WeatherReportActivity : AppCompatActivity() {
     //function to init and change language
     private fun setupLanguage(){
 
-        var currentLanguage = "english"
+        var currentLanguage = pref.getString(SELECTED_LANGUAGE)
+        if (currentLanguage == null){
+            currentLanguage = LANGUAGE_ENGLISH
+        }
 
-        swLanguage.isChecked = currentLanguage != "english"
-        //setLocale("hi-rIN")
+        if (currentLanguage == LANGUAGE_ENGLISH){
+            swLanguage.isChecked = false
+            //setLocale("en")
+        } else {
+            swLanguage.isChecked = true
+            //setLocale("hi-rIN")
+        }
 
         swLanguage.setOnCheckedChangeListener { buttonView, isChecked ->
             if (isChecked){
-                currentLanguage = "hindi"
-                setLocale("hi-rIN")
+                currentLanguage = LANGUAGE_HINDI
+                setLocale("hi")
             } else {
-                currentLanguage = "english"
+                currentLanguage = LANGUAGE_ENGLISH
+                setLocale("en")
             }
+            pref.putString(SELECTED_LANGUAGE, currentLanguage!!)
         }
 
     }
@@ -191,7 +228,7 @@ class WeatherReportActivity : AppCompatActivity() {
         val resources: Resources = resources
         val config: Configuration = resources.configuration
         config.setLocale(locale)
-        createConfigurationContext(config)
+        baseContext.createConfigurationContext(config)
         //resources.updateConfiguration(config, resources.displayMetrics)
 
         //finish()
@@ -206,18 +243,28 @@ class WeatherReportActivity : AppCompatActivity() {
     //function to init and change theme
     private fun setupTheme(){
 
-        var currentTheme = "light"
+        var currentTheme = pref.getString(SELECTED_THEME)
+        if (currentTheme == null){
+            currentTheme = THEME_LIGHT
+        }
 
-        swTheme.isChecked = currentTheme != "light"
+        if (currentTheme == THEME_LIGHT){
+            swTheme.isChecked = false
+            changeTheme(AppCompatDelegate.MODE_NIGHT_NO)
+        } else {
+            swTheme.isChecked = true
+            changeTheme(AppCompatDelegate.MODE_NIGHT_YES)
+        }
 
         swTheme.setOnCheckedChangeListener { buttonView, isChecked ->
             if (isChecked){
-                currentTheme = "dark"
+                currentTheme = THEME_DARK
                 changeTheme(AppCompatDelegate.MODE_NIGHT_YES)
             } else {
-                currentTheme = "light"
+                currentTheme = THEME_LIGHT
                 changeTheme(AppCompatDelegate.MODE_NIGHT_NO)
             }
+            pref.putString(SELECTED_THEME, currentTheme!!)
         }
 
     }

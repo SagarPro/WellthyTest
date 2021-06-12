@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">WellthyTest</string>
+    <string name="app_name" translatable="false">WellthyTest</string>
 
     <string name="enable_gps">Enable GPS</string>
     <string name="required_for_this_app">This app requires current location details to get weather report</string>

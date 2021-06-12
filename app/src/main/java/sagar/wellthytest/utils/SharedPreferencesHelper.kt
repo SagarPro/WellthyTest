@@ -14,7 +14,7 @@ class SharedPreferencesHelper(val context: Context) {
 
     fun getString(key: String): String? {
         val settings = context.getSharedPreferences(PREF, 0)
-        return settings.getString(key, "")
+        return settings.getString(key, null)
     }
 
 }
