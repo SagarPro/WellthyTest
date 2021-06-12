@@ -4,13 +4,16 @@ import android.Manifest
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.location.Geocoder
 import android.location.LocationManager
 import android.provider.Settings
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import com.google.android.gms.maps.model.LatLng
 import sagar.wellthytest.R
+import java.util.*
 
 object PermissionUtils {
 
@@ -48,6 +51,16 @@ object PermissionUtils {
                     this.startActivity(Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS))
                 }
                 .show()
+    }
+
+    //function to get city by latlang
+    fun Context.getCurrentCity(currentLatLng: LatLng): String?{
+        val geocoder = Geocoder(this, Locale.getDefault())
+        val addresses = geocoder.getFromLocation(currentLatLng.latitude, currentLatLng.longitude, 1)
+        if (addresses != null && addresses.size > 0) {
+            return addresses[0].locality
+        }
+        return null
     }
 
 }

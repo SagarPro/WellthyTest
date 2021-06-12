@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -7,12 +8,95 @@
     tools:context=".WeatherReportActivity">
 
     <TextView
+        android:id="@+id/tvCityName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Hello World!"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:text="Bengaluru"
+        android:textSize="18sp"
+        android:fontFamily="sans-serif-condensed-light"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_margin="20dp"/>
+
+    <TextView
+        android:id="@+id/tvTemperature"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:text="27"
+        android:textSize="100sp"
+        android:fontFamily="sans-serif-condensed-light"
+        android:includeFontPadding="false"
+        android:lineSpacingExtra="0dp"
+        app:layout_constraintTop_toBottomOf="@id/tvCityName"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="20dp"/>
+
+    <TextView
+        android:id="@+id/celsius"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="\u2103"
+        android:textSize="25sp"
+        android:fontFamily="sans-serif-condensed-medium"
+        app:layout_constraintTop_toTopOf="@id/tvTemperature"
+        app:layout_constraintStart_toEndOf="@id/tvTemperature"
+        android:layout_marginStart="5dp"
+        android:layout_marginTop="12dp"/>
+
+    <TextView
+        android:id="@+id/tvWeatherDescription"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Light Rain"
+        android:textSize="20sp"
+        android:fontFamily="sans-serif-condensed-light"
+        app:layout_constraintTop_toBottomOf="@id/tvTemperature"
+        app:layout_constraintStart_toStartOf="@id/tvTemperature"
+        android:layout_marginTop="5dp"/>
+
+    <ImageView
+        android:id="@+id/ivWeatherImage"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@id/tvTemperature"
+        android:layout_marginEnd="20dp"
+        android:layout_marginTop="15dp"
+        android:background="@color/black"/>
+
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_margin="20dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <include
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                layout="@layout/item_language"
+                android:layout_margin="10dp"/>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="0.5dp"
+                android:layout_margin="10dp"
+                android:background="@color/black"/>
+
+            <include
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                layout="@layout/item_theme"
+                android:layout_margin="10dp"/>
+
+        </LinearLayout>
+
+    </androidx.cardview.widget.CardView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -2,6 +2,7 @@ package sagar.wellthytest
 
 import android.Manifest
 import android.content.pm.PackageManager
+import android.location.Location
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Looper
@@ -10,12 +11,15 @@ import androidx.core.app.ActivityCompat
 import com.google.android.gms.location.*
 import com.google.android.gms.maps.model.LatLng
 import sagar.wellthytest.utils.PermissionUtils.LOCATION_PERMISSION_REQUEST_CODE
+import sagar.wellthytest.utils.PermissionUtils.getCurrentCity
 import sagar.wellthytest.utils.PermissionUtils.isAccessFineLocationGranted
 import sagar.wellthytest.utils.PermissionUtils.isLocationEnabled
 import sagar.wellthytest.utils.PermissionUtils.requestAccessFineLocationPermission
 import sagar.wellthytest.utils.PermissionUtils.showGPSNotEnabledDialog
 
 class WeatherReportActivity : AppCompatActivity() {
+
+    private val TAG = "WeatherReportActivity"
 
     private var currentLatLng: LatLng? = null
     private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
@@ -68,7 +72,7 @@ class WeatherReportActivity : AppCompatActivity() {
                 //get new location, if last known location is null
                 getNewLocation()
             } else {
-                Log.e("getLocationValue", "${location.latitude} - ${location.longitude}")
+                onLocationReceived(location)
             }
         }
     }
@@ -84,7 +88,7 @@ class WeatherReportActivity : AppCompatActivity() {
         locationCallback = object : LocationCallback() {
             override fun onLocationResult(p0: LocationResult) {
                 val location = p0.lastLocation
-                Log.e("getLocationValueNew", "${location.latitude} - ${location.longitude}")
+                onLocationReceived(location)
             }
         }
 
@@ -99,6 +103,14 @@ class WeatherReportActivity : AppCompatActivity() {
             locationCallback,
             Looper.myLooper()!!
         )
+    }
+
+    //once current location is received get city name
+    private fun onLocationReceived(location: Location){
+        Log.d(TAG, "${location.latitude} - ${location.longitude}")
+        currentLatLng = LatLng(location.latitude, location.longitude)
+        val city = baseContext.getCurrentCity(currentLatLng!!)
+        Log.d(TAG, "City: $city")
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
