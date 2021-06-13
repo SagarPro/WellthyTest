@@ -5,13 +5,13 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".WeatherReportActivity">
+    tools:context=".ui.WeatherReportActivity">
 
     <TextView
         android:id="@+id/tvCityName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="City Name"
+        android:text=""
         android:textSize="18sp"
         android:fontFamily="sans-serif-condensed-light"
         app:layout_constraintLeft_toLeftOf="parent"
@@ -37,7 +37,7 @@
         android:id="@+id/celsius"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="\u2103"
+        android:text=""
         android:textSize="25sp"
         android:fontFamily="sans-serif-condensed-medium"
         app:layout_constraintTop_toTopOf="@id/tvTemperature"
@@ -66,7 +66,39 @@
         android:layout_marginEnd="20dp"
         android:layout_marginTop="15dp"/>
 
+    <TextView
+        android:id="@+id/noInternetView"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:text="@string/no_internet_connection"
+        android:textSize="22sp"
+        android:fontFamily="sans-serif-condensed-medium"
+        android:gravity="center"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/cvBottomView"
+        android:background="?attr/colorOnPrimary"
+        android:visibility="gone"
+        android:padding="20dp"/>
+
+    <TextView
+        android:id="@+id/locationPermissionDeniedView"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:text="@string/no_location_permission"
+        android:textSize="22sp"
+        android:fontFamily="sans-serif-condensed-medium"
+        android:gravity="center"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/cvBottomView"
+        android:background="?attr/colorOnPrimary"
+        android:padding="20dp"/>
+
     <androidx.cardview.widget.CardView
+        android:id="@+id/cvBottomView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_constraintBottom_toBottomOf="parent"

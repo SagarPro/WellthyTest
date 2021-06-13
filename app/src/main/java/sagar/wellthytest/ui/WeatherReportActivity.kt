@@ -1,13 +1,14 @@
-package sagar.wellthytest
+package sagar.wellthytest.ui
 
 import android.Manifest
-import android.annotation.SuppressLint
 import android.content.Context
+import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.location.Location
 import android.os.Bundle
 import android.os.Looper
 import android.util.Log
+import android.view.View
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.app.ActivityCompat
 import com.bumptech.glide.Glide
@@ -16,8 +17,10 @@ import com.google.android.gms.maps.model.LatLng
 import kotlinx.android.synthetic.main.activity_weather_report.*
 import kotlinx.android.synthetic.main.item_language.*
 import kotlinx.android.synthetic.main.item_theme.*
+import sagar.wellthytest.R
 import sagar.wellthytest.api.ApiResponse
 import sagar.wellthytest.base.BaseActivity
+import sagar.wellthytest.interfaces.AlertDialogListener
 import sagar.wellthytest.model.WeatherReportModel
 import sagar.wellthytest.utils.AppConstants.LANGUAGE_ENGLISH
 import sagar.wellthytest.utils.AppConstants.LANGUAGE_HINDI
@@ -25,6 +28,7 @@ import sagar.wellthytest.utils.AppConstants.SELECTED_LANGUAGE
 import sagar.wellthytest.utils.AppConstants.SELECTED_THEME
 import sagar.wellthytest.utils.AppConstants.THEME_DARK
 import sagar.wellthytest.utils.AppConstants.THEME_LIGHT
+import sagar.wellthytest.utils.ConnectivityReceiver
 import sagar.wellthytest.utils.LocaleHelper
 import sagar.wellthytest.utils.PermissionUtils.LOCATION_PERMISSION_REQUEST_CODE
 import sagar.wellthytest.utils.PermissionUtils.getCurrentCity
@@ -33,13 +37,14 @@ import sagar.wellthytest.utils.PermissionUtils.isLocationEnabled
 import sagar.wellthytest.utils.PermissionUtils.requestAccessFineLocationPermission
 import sagar.wellthytest.utils.PermissionUtils.showGPSNotEnabledDialog
 import sagar.wellthytest.utils.SharedPreferencesHelper
-import sagar.wellthytest.utils.ViewUtils
 import sagar.wellthytest.utils.ViewUtils.hide
 import sagar.wellthytest.utils.ViewUtils.show
+import sagar.wellthytest.utils.ViewUtils.showCustomMessage
 import sagar.wellthytest.viewmodel.WeatherReportViewModel
+import java.lang.IllegalArgumentException
 import javax.inject.Inject
 
-class WeatherReportActivity: BaseActivity<WeatherReportViewModel>() {
+class WeatherReportActivity: BaseActivity<WeatherReportViewModel>(), ConnectivityReceiver.ConnectivityReceiverListener, AlertDialogListener {
 
     private val TAG = "WeatherReportActivity"
 
@@ -49,6 +54,8 @@ class WeatherReportActivity: BaseActivity<WeatherReportViewModel>() {
     private var currentLatLng: LatLng? = null
     private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
     private lateinit var locationCallback: LocationCallback
+
+    lateinit var connectivityReceiver: ConnectivityReceiver
 
     override fun provideLayout(): Int {
         return R.layout.activity_weather_report
@@ -64,8 +71,12 @@ class WeatherReportActivity: BaseActivity<WeatherReportViewModel>() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        progressBar.hide()
+        noInternetView.visibility = View.GONE
+        locationPermissionDeniedView.visibility = View.GONE
         setupLanguage()
         setupTheme()
+        requestLocationPermission()
     }
 
     //to apply selected language when activity launch
@@ -75,7 +86,26 @@ class WeatherReportActivity: BaseActivity<WeatherReportViewModel>() {
 
     override fun onStart() {
         super.onStart()
-        fetchLocation()
+
+        //init network connection listener
+        try {
+            ConnectivityReceiver.connectivityReceiverListener = this
+            connectivityReceiver = ConnectivityReceiver()
+
+            //to check if network changed
+            val intentFilter = IntentFilter("android.net.conn.CONNECTIVITY_CHANGE")
+            try{
+                unregisterReceiver(connectivityReceiver) //unregister receiver
+            } catch (e: IllegalArgumentException){}
+            registerReceiver(connectivityReceiver, intentFilter) //register receiver again with new network connection
+        } catch (e: Exception){}
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        try{
+            unregisterReceiver(connectivityReceiver)
+        } catch (e: IllegalArgumentException){}
     }
 
     private fun fetchLocation(){
@@ -84,6 +114,7 @@ class WeatherReportActivity: BaseActivity<WeatherReportViewModel>() {
         if (currentLatLng == null) {
             when {
                 this.isAccessFineLocationGranted() -> {
+                    locationPermissionDeniedView.visibility = View.GONE
                     when {
                         this.isLocationEnabled() -> {
                             setUpLocationListener()
@@ -92,16 +123,25 @@ class WeatherReportActivity: BaseActivity<WeatherReportViewModel>() {
                             this.showGPSNotEnabledDialog()
                         }
                     }
-                }
-                else -> {
+                } else -> {
                     this.requestAccessFineLocationPermission(LOCATION_PERMISSION_REQUEST_CODE)
                 }
             }
+        } else {
+            locationPermissionDeniedView.visibility = View.GONE
+        }
+    }
+
+    //to request for location permission after denied by user
+    private fun requestLocationPermission(){
+        locationPermissionDeniedView.setOnClickListener {
+            this.requestAccessFineLocationPermission(LOCATION_PERMISSION_REQUEST_CODE)
         }
     }
 
     //function to get last known location if present else get new location
     private fun setUpLocationListener() {
+        progressBar.show()
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
             ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             this.requestAccessFineLocationPermission(LOCATION_PERMISSION_REQUEST_CODE)
@@ -152,12 +192,25 @@ class WeatherReportActivity: BaseActivity<WeatherReportViewModel>() {
     private fun onLocationReceived(location: Location){
         Log.d(TAG, "${location.latitude} - ${location.longitude}")
         currentLatLng = LatLng(location.latitude, location.longitude)
+        getCityAndCallApi()
+    }
+
+    private fun getCityAndCallApi(){
+        progressBar.hide()
         val city = baseContext.getCurrentCity(currentLatLng!!)
         Log.d(TAG, "City: $city")
 
-        //tvCityName.text = city
-        tvCityName.text = city
-        getWeatherReport(city!!)
+        //check if we are getting city or null
+        try {
+            tvCityName.text = city
+            getWeatherReport(city!!)
+        } catch (e: java.lang.Exception){
+            //if we are not getting city name for any reason, ask user to get city name again
+            this.showCustomMessage(
+                    resources.getString(R.string.alert_dialog_title_city_name),
+                    resources.getString(R.string.alert_dialog_message_city_name),
+                    this)
+        }
     }
 
     override fun onRequestPermissionsResult(
@@ -176,6 +229,7 @@ class WeatherReportActivity: BaseActivity<WeatherReportViewModel>() {
                     fetchLocation()
                 } else {
                     //display location permission denied msg
+                    locationPermissionDeniedView.visibility = View.VISIBLE
                 }
             }
         }
@@ -196,10 +250,10 @@ class WeatherReportActivity: BaseActivity<WeatherReportViewModel>() {
         swLanguage.setOnCheckedChangeListener { buttonView, isChecked ->
             if (isChecked){
                 currentLanguage = LANGUAGE_HINDI
-                setLocale("hi")
+                setLocale("hi") //to set hindi language
             } else {
                 currentLanguage = LANGUAGE_ENGLISH
-                setLocale("en")
+                setLocale("en") //to set english language
             }
             pref.putString(SELECTED_LANGUAGE, currentLanguage!!)
         }
@@ -209,14 +263,7 @@ class WeatherReportActivity: BaseActivity<WeatherReportViewModel>() {
     //function to set selected language using LocaleHelper class
     private fun setLocale(languageCode: String) {
         LocaleHelper.setLocale(this, languageCode)
-        recreate()
-
-        //restart activity to apply language changes without any activity transitions
-        /*finish()
-        overridePendingTransition(0, 0)
-        startActivity(intent)
-        overridePendingTransition(0, 0)*/
-
+        recreate() // recreate view to apply language changes
     }
 
     //function to init and change theme
@@ -229,13 +276,7 @@ class WeatherReportActivity: BaseActivity<WeatherReportViewModel>() {
         }
 
         //set switch to true or false based on the theme value
-        if (currentTheme == THEME_LIGHT){
-            swTheme.isChecked = false
-            changeTheme(AppCompatDelegate.MODE_NIGHT_NO)
-        } else {
-            swTheme.isChecked = true
-            changeTheme(AppCompatDelegate.MODE_NIGHT_YES)
-        }
+        swTheme.isChecked = currentTheme != THEME_LIGHT
 
         swTheme.setOnCheckedChangeListener { buttonView, isChecked ->
             if (isChecked){
@@ -282,6 +323,7 @@ class WeatherReportActivity: BaseActivity<WeatherReportViewModel>() {
     private fun updateWeatherReport(weatherReport: WeatherReportModel){
         //set temperature
         tvTemperature.text = weatherReport.temperature?.toString()
+        celsius.text = "\u2103"
 
         //load weather description array and display
         val weatherDesc = weatherReport.weather_descriptions
@@ -303,6 +345,19 @@ class WeatherReportActivity: BaseActivity<WeatherReportViewModel>() {
             //glide library to load an image
             Glide.with(this).load(weatherImages[0]).into(ivWeatherImage)
         }
+    }
+
+    override fun onNetworkConnectionChanged(isConnected: Boolean) {
+        if (isConnected){
+            noInternetView.visibility = View.GONE
+            fetchLocation()
+        } else {
+            noInternetView.visibility = View.VISIBLE
+        }
+    }
+
+    override fun userRequestedToGetCityName() {
+        getCityAndCallApi()
     }
 
 }

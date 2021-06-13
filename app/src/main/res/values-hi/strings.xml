@@ -2,6 +2,9 @@
 <resources>
     <string name="app_name">WellthyTest</string>
 
+    <string name="no_internet_connection">अपने इंटरनेट कनेक्शन की जाँच करें और पुनः प्रयास करें</string>
+    <string name="no_location_permission">मौसम रिपोर्ट प्राप्त करने के लिए स्थान अनुमति सक्षम करें</string>
+
     <string name="enable_gps">जीपीएस सक्षम करें</string>
     <string name="required_for_this_app">मौसम की रिपोर्ट प्राप्त करने के लिए इस ऐप को वर्तमान स्थान विवरण की आवश्यकता है</string>
     <string name="enable">सक्षम</string>
@@ -13,4 +16,7 @@
     <string name="theme">विषय</string>
     <string name="theme_light">रोशनी</string>
     <string name="theme_dark">अंधेरा</string>
+
+    <string name="alert_dialog_title_city_name">शहर का नाम</string>
+    <string name="alert_dialog_message_city_name">शहर का नाम नहीं मिल पा रहा है, कृपया पुनः प्रयास करें</string>
 </resources>
