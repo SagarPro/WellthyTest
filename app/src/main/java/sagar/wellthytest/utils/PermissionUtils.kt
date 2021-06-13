@@ -11,8 +11,8 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import com.google.android.gms.maps.model.LatLng
 import sagar.wellthytest.R
+import sagar.wellthytest.model.LatLng
 import java.util.*
 
 object PermissionUtils {
@@ -57,7 +57,7 @@ object PermissionUtils {
     fun Context.getCurrentCity(currentLatLng: LatLng): String?{
         try {
             val geocoder = Geocoder(this, Locale.getDefault())
-            val addresses = geocoder.getFromLocation(currentLatLng.latitude, currentLatLng.longitude, 1)
+            val addresses = geocoder.getFromLocation(currentLatLng.latitude!!, currentLatLng.longitude!!, 1)
             if (addresses != null && addresses.size > 0) {
                 return addresses[0].locality
             }

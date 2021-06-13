@@ -13,7 +13,6 @@ import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.app.ActivityCompat
 import com.bumptech.glide.Glide
 import com.google.android.gms.location.*
-import com.google.android.gms.maps.model.LatLng
 import kotlinx.android.synthetic.main.activity_weather_report.*
 import kotlinx.android.synthetic.main.item_language.*
 import kotlinx.android.synthetic.main.item_theme.*
@@ -21,6 +20,7 @@ import sagar.wellthytest.R
 import sagar.wellthytest.api.ApiResponse
 import sagar.wellthytest.base.BaseActivity
 import sagar.wellthytest.interfaces.AlertDialogListener
+import sagar.wellthytest.model.LatLng
 import sagar.wellthytest.model.WeatherReportModel
 import sagar.wellthytest.utils.AppConstants.LANGUAGE_ENGLISH
 import sagar.wellthytest.utils.AppConstants.LANGUAGE_HINDI
@@ -76,7 +76,7 @@ class WeatherReportActivity: BaseActivity<WeatherReportViewModel>(), Connectivit
         locationPermissionDeniedView.visibility = View.GONE
         setupLanguage()
         setupTheme()
-        requestLocationPermission()
+        requestLocationPermissionOnUserDemand()
     }
 
     //to apply selected language when activity launch
@@ -133,7 +133,7 @@ class WeatherReportActivity: BaseActivity<WeatherReportViewModel>(), Connectivit
     }
 
     //to request for location permission after denied by user
-    private fun requestLocationPermission(){
+    private fun requestLocationPermissionOnUserDemand(){
         locationPermissionDeniedView.setOnClickListener {
             this.requestAccessFineLocationPermission(LOCATION_PERMISSION_REQUEST_CODE)
         }
@@ -162,11 +162,9 @@ class WeatherReportActivity: BaseActivity<WeatherReportViewModel>(), Connectivit
 
     //function to get new location
     private fun getNewLocation(){
-        val locationRequest = LocationRequest.create()
-        locationRequest.priority = LocationRequest.PRIORITY_HIGH_ACCURACY
-        locationRequest.interval = 0
-        locationRequest.fastestInterval = 0
-        locationRequest.numUpdates = 2
+        val locationRequest = LocationRequest.create().apply {
+            priority = LocationRequest.PRIORITY_HIGH_ACCURACY
+        }
 
         locationCallback = object : LocationCallback() {
             override fun onLocationResult(p0: LocationResult) {
@@ -225,10 +223,9 @@ class WeatherReportActivity: BaseActivity<WeatherReportViewModel>(), Connectivit
                     grantResults[0] == PackageManager.PERMISSION_GRANTED &&
                     grantResults[1] == PackageManager.PERMISSION_GRANTED
                 ) {
-                    //setUpLocationListener() //if location permission is given, get current location
                     fetchLocation()
                 } else {
-                    //display location permission denied msg
+                    //display location permission denied message
                     locationPermissionDeniedView.visibility = View.VISIBLE
                 }
             }
@@ -347,6 +344,7 @@ class WeatherReportActivity: BaseActivity<WeatherReportViewModel>(), Connectivit
         }
     }
 
+    //network connection listener
     override fun onNetworkConnectionChanged(isConnected: Boolean) {
         if (isConnected){
             noInternetView.visibility = View.GONE
@@ -356,6 +354,7 @@ class WeatherReportActivity: BaseActivity<WeatherReportViewModel>(), Connectivit
         }
     }
 
+    //function to get city name, if user demand to get city name again
     override fun userRequestedToGetCityName() {
         getCityAndCallApi()
     }
