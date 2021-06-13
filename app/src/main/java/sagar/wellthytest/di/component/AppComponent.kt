@@ -6,6 +6,7 @@ import dagger.Component
 import dagger.android.AndroidInjector
 import dagger.android.support.AndroidSupportInjectionModule
 import sagar.wellthytest.WellthyApp
+import sagar.wellthytest.di.module.ActivityModule
 import sagar.wellthytest.di.module.AppModule
 import sagar.wellthytest.di.module.ViewModelModule
 import javax.inject.Singleton
@@ -13,6 +14,7 @@ import javax.inject.Singleton
 @Singleton
 @Component(modules =
                 [
+                    ActivityModule::class,
                     ViewModelModule::class,
                     AppModule::class,
                     AndroidSupportInjectionModule::class

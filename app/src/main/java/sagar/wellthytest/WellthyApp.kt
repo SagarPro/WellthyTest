@@ -19,7 +19,7 @@ class WellthyApp: DaggerApplication() {
     override fun onCreate() {
         super.onCreate()
         context = applicationContext
-        SharedPreferencesHelper(context)// initialize sharedPreferences
+        //SharedPreferencesHelper(context)// initialize sharedPreferences
     }
 
     override fun applicationInjector(): AndroidInjector<out DaggerApplication>? {

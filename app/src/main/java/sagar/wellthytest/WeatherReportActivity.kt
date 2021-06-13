@@ -8,14 +8,17 @@ import android.location.Location
 import android.os.Bundle
 import android.os.Looper
 import android.util.Log
-import android.widget.ImageView
-import android.widget.TextView
-import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
-import androidx.appcompat.widget.SwitchCompat
 import androidx.core.app.ActivityCompat
+import com.bumptech.glide.Glide
 import com.google.android.gms.location.*
 import com.google.android.gms.maps.model.LatLng
+import kotlinx.android.synthetic.main.activity_weather_report.*
+import kotlinx.android.synthetic.main.item_language.*
+import kotlinx.android.synthetic.main.item_theme.*
+import sagar.wellthytest.api.ApiResponse
+import sagar.wellthytest.base.BaseActivity
+import sagar.wellthytest.model.WeatherReportModel
 import sagar.wellthytest.utils.AppConstants.LANGUAGE_ENGLISH
 import sagar.wellthytest.utils.AppConstants.LANGUAGE_HINDI
 import sagar.wellthytest.utils.AppConstants.SELECTED_LANGUAGE
@@ -30,40 +33,37 @@ import sagar.wellthytest.utils.PermissionUtils.isLocationEnabled
 import sagar.wellthytest.utils.PermissionUtils.requestAccessFineLocationPermission
 import sagar.wellthytest.utils.PermissionUtils.showGPSNotEnabledDialog
 import sagar.wellthytest.utils.SharedPreferencesHelper
-import java.util.*
+import sagar.wellthytest.utils.ViewUtils
+import sagar.wellthytest.utils.ViewUtils.hide
+import sagar.wellthytest.utils.ViewUtils.show
+import sagar.wellthytest.viewmodel.WeatherReportViewModel
+import javax.inject.Inject
 
-
-class WeatherReportActivity : AppCompatActivity() {
+class WeatherReportActivity: BaseActivity<WeatherReportViewModel>() {
 
     private val TAG = "WeatherReportActivity"
 
-    @SuppressLint("StaticFieldLeak")
-    private val pref = SharedPreferencesHelper(WellthyApp.context)
+    @Inject
+    lateinit var pref: SharedPreferencesHelper
 
     private var currentLatLng: LatLng? = null
     private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
     private lateinit var locationCallback: LocationCallback
 
-    private lateinit var tvCityName: TextView
-    private lateinit var tvTemperature: TextView
-    private lateinit var tvWeatherDescription: TextView
-    private lateinit var ivWeatherImage: ImageView
+    override fun provideLayout(): Int {
+        return R.layout.activity_weather_report
+    }
 
-    private lateinit var swLanguage: SwitchCompat
-    private lateinit var swTheme: SwitchCompat
+    override fun provideViewModelClass(): Class<WeatherReportViewModel> {
+        return WeatherReportViewModel::class.java
+    }
+
+    override fun initViews() {
+        //we can initialize any views here
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_weather_report)
-
-        tvCityName = findViewById(R.id.tvCityName)
-        tvTemperature = findViewById(R.id.tvTemperature)
-        tvWeatherDescription = findViewById(R.id.tvWeatherDescription)
-        ivWeatherImage = findViewById(R.id.ivWeatherImage)
-
-        swLanguage = findViewById(R.id.swLanguage)
-        swTheme = findViewById(R.id.swTheme)
-
         setupLanguage()
         setupTheme()
     }
@@ -155,7 +155,9 @@ class WeatherReportActivity : AppCompatActivity() {
         val city = baseContext.getCurrentCity(currentLatLng!!)
         Log.d(TAG, "City: $city")
 
+        //tvCityName.text = city
         tvCityName.text = city
+        getWeatherReport(city!!)
     }
 
     override fun onRequestPermissionsResult(
@@ -206,19 +208,15 @@ class WeatherReportActivity : AppCompatActivity() {
 
     //function to set selected language using LocaleHelper class
     private fun setLocale(languageCode: String) {
-        val context: Context = LocaleHelper.setLocale(this, languageCode)
-        val myLocale = Locale(languageCode)
-        val res = context.resources
-        val dm = res.displayMetrics
-        val conf = res.configuration
-        conf.locale = myLocale
-        res.updateConfiguration(conf, dm)
+        LocaleHelper.setLocale(this, languageCode)
+        recreate()
 
-        //restart activity to apply language change
-        finish()
+        //restart activity to apply language changes without any activity transitions
+        /*finish()
         overridePendingTransition(0, 0)
         startActivity(intent)
-        overridePendingTransition(0, 0)
+        overridePendingTransition(0, 0)*/
+
     }
 
     //function to init and change theme
@@ -255,6 +253,56 @@ class WeatherReportActivity : AppCompatActivity() {
     //function to change theme
     private fun changeTheme(mode: Int){
         AppCompatDelegate.setDefaultNightMode(mode)
+    }
+
+    //call api after getting city name
+    private fun getWeatherReport(city: String){
+        //observer to observe for api response
+        getViewModel().getWeatherReport(city).observe(this, androidx.lifecycle.Observer { weatherReport ->
+            if (weatherReport != null) {
+                when (weatherReport.status) {
+                    ApiResponse.Status.LOADING -> {
+                        progressBar.show()
+                    }
+                    ApiResponse.Status.SUCCESS -> {
+                        progressBar.hide()
+                        if (weatherReport.response != null) {
+                            updateWeatherReport(weatherReport.response)
+                        }
+                    }
+                    ApiResponse.Status.ERROR -> {
+                        progressBar.hide()
+                    }
+                }
+            }
+        })
+    }
+
+    //update weather info, once we receive from api
+    private fun updateWeatherReport(weatherReport: WeatherReportModel){
+        //set temperature
+        tvTemperature.text = weatherReport.temperature?.toString()
+
+        //load weather description array and display
+        val weatherDesc = weatherReport.weather_descriptions
+        if (weatherDesc != null && weatherDesc.isNotEmpty()){
+            var displayWeatherDesc = ""
+            for (i in 0 until weatherDesc.size-1){
+                displayWeatherDesc = "${weatherDesc[i]}/n"
+            }
+
+            //to append with last element without /n
+            displayWeatherDesc = "$displayWeatherDesc${weatherDesc[weatherDesc.size-1]}"
+
+            tvWeatherDescription.text = displayWeatherDesc
+        }
+
+        //load weather images
+        val weatherImages = weatherReport.weather_icons
+        if (weatherImages != null && weatherImages.isNotEmpty()){
+            //glide library to load an image
+            Glide.with(this).load(weatherImages[0]).into(ivWeatherImage)
+        }
     }
 
 }

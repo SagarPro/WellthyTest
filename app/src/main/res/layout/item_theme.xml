@@ -4,7 +4,7 @@
     android:layout_height="wrap_content">
 
     <TextView
-        android:id="@+id/header"
+        android:id="@+id/themeHeader"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/theme"
@@ -14,7 +14,7 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/header">
+        android:layout_below="@+id/themeHeader">
 
         <TextView
             android:id="@+id/themeLight"

@@ -2,16 +2,15 @@ package sagar.wellthytest.api
 
 import com.google.gson.JsonObject
 import retrofit2.Call
-import retrofit2.http.GET
-import retrofit2.http.Headers
-import retrofit2.http.Url
+import retrofit2.http.*
 
 interface ApiInterface {
 
     @Headers("Content-Type: application/json")
-    @GET
+    @GET("current")
     fun getWeatherReport(
-        @Url url: String
+            @Query("access_key") access_key: String,
+            @Query("query") query: String,
     ): Call<JsonObject>
 
 }

@@ -6,7 +6,6 @@ import android.os.Build
 import sagar.wellthytest.WellthyApp
 import java.util.*
 
-
 object LocaleHelper {
 
     private const val SELECTED_LANGUAGE = "Locale.Helper.Selected.Language"
@@ -32,7 +31,6 @@ object LocaleHelper {
     //get last updated language
     private fun getPersistedData(): String? {
         val pref = SharedPreferencesHelper(WellthyApp.context)
-        val v = pref.getString(SELECTED_LANGUAGE)
         return pref.getString(SELECTED_LANGUAGE)
     }
 
